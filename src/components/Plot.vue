@@ -10,6 +10,8 @@ import uPlot from "uplot"
 
 import { defineComponent } from "vue"
 
+import mavlink2rest from "./Mavlink2Rest"
+
 export default defineComponent({
     name: "Plot",
 
@@ -43,11 +45,8 @@ export default defineComponent({
         this.setupPlot()
         // TODO: find a right way to make it responsive
 
-        const batteryWs = new WebSocket(
-            "ws://localhost:8088/ws/mavlink?filter=BATTERY_STATUS"
-        )
-        batteryWs.onmessage = (message: MessageEvent) => {
-            const json = JSON.parse(message.data)
+        mavlink2rest.startListening("?filter=BATTERY_STATUS", 1, (message) => {
+            const json = JSON.parse(message)
 
             let finalVoltage = 0
             for (let voltage of json.voltages) {
@@ -62,7 +61,7 @@ export default defineComponent({
                 finalVoltage / 1e3,
                 json.current_battery / 1e2
             )
-        }
+        })
     },
     methods: {
         updatePlot(time: number, voltage: number, current: number) {

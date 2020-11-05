@@ -16,6 +16,8 @@ import { LMap, LMarker, LTileLayer } from "@vue-leaflet/vue-leaflet"
 
 import "leaflet/dist/leaflet.css"
 
+import mavlink2rest from "./Mavlink2Rest"
+
 import { defineComponent } from "vue"
 
 export default defineComponent({
@@ -33,13 +35,10 @@ export default defineComponent({
         }
     },
     mounted() {
-        const gpsWs = new WebSocket(
-            "ws://localhost:8088/ws/mavlink?filter=GLOBAL_POSITION_INT"
-        )
-        gpsWs.onmessage = (message: MessageEvent) => {
-            const json = JSON.parse(message.data)
+        mavlink2rest.startListening("?filter=GLOBAL_POSITION_INT", 1, (message) => {
+            const json = JSON.parse(message)
             this.position = [json.lat / 10e6, json.lon / 10e6]
-        }
+        })
     },
 })
 </script>
