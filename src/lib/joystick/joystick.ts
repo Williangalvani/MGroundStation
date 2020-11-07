@@ -1,29 +1,5 @@
 import { GamepadListener } from "gamepad.js"
 
-export namespace EventType {
-    export function events(): Array<String> {
-        return Object.keys(EventType).map(name => name.toLowerCase())
-    }
-
-    export function fromGamepadEventType(type: String): EventType {
-        const fields = type.split(":")
-        if (fields.length <= 1) {
-            return EventType.Unknown
-        }
-
-        const name = fields[1]
-        console.log(`name: ${name}`)
-
-        for(const eventName of EventType.events()) {
-            if(eventName == name) {
-                return eventName as EventType
-            }
-        }
-
-        return EventType.Unknown
-    }
-}
-
 export enum EventType {
     Unknown = "unknown",
     Connected = "connected",
@@ -37,9 +13,32 @@ type GamepadEvent = {
     detail: Object,
 }
 
-type JoystickEvent = {
+export type JoystickEvent = {
     type: EventType,
     detail: Object,
+}
+
+export namespace EventType {
+    export function events(): Array<String> {
+        return Object.keys(EventType).map(name => name.toLowerCase())
+    }
+
+    export function fromGamepadEventType(type: String): EventType {
+        const fields = type.split(":")
+        if (fields.length <= 1) {
+            return EventType.Unknown
+        }
+
+        const name = fields[1]
+
+        for(const eventName of EventType.events()) {
+            if(eventName == name) {
+                return eventName as EventType
+            }
+        }
+
+        return EventType.Unknown
+    }
 }
 
 type callbackType = (event: JoystickEvent) => void

@@ -50,11 +50,7 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 
-import { joystickManager, EventType} from "../lib/joystick/joystick"
-
-joystickManager.onChanged((event) => {
-    console.log(event, typeof event.type, event.type == EventType.Axis)
-})
+import { joystickManager, EventType, JoystickEvent} from "../lib/joystick/joystick"
 
 export default defineComponent({
     name: "Joystick",
@@ -68,10 +64,19 @@ export default defineComponent({
     },
 
     created() {
+        joystickManager.onChanged((event) => {
+            this.proccessJoystickEvent(event)
+        })
     },
 
     mounted() {
     },
+
+    methods: {
+        proccessJoystickEvent(event: JoystickEvent) {
+            console.log(event.type == EventType.Axis)
+        }
+    }
 })
 </script>
 
