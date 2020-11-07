@@ -82,8 +82,9 @@
 </template>
 
 <script lang="ts">
-import Map from "./Map.vue"
 import { Attitude, Heading } from "vue-flight-indicators"
+
+import Map from "./Map.vue"
 import Plot from "./Plot.vue"
 import Servos from "./Servos.vue"
 
