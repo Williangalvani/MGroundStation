@@ -52,13 +52,14 @@
       "parser": "@typescript-eslint/parser"
     },
     "rules": {
-      "no-trailing-spaces": [
-        "error",
-        {
-          "skipBlankLines": false,
-          "ignoreComments": false
-        }
-      ],
+      "no-trailing-spaces": ["error", {
+        "skipBlankLines": false,
+        "ignoreComments": false
+      }],
+      "comma-spacing": ["error", {
+        "before": false,
+        "after": true
+      }],
       "indent": [
         "error",
         4
