@@ -50,7 +50,11 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 
-import VueGamepad from 'vue-gamepad';
+import { joystickManager, EventType} from "../lib/joystick/joystick"
+
+joystickManager.onChanged((event) => {
+    console.log(event, typeof event.type, event.type == EventType.Axis)
+})
 
 export default defineComponent({
     name: "Joystick",

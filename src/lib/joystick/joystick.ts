@@ -1,11 +1,48 @@
 import { GamepadListener } from "gamepad.js"
 
+export namespace EventType {
+    export function events(): Array<String> {
+        return Object.keys(EventType).map(name => name.toLowerCase())
+    }
 
-type gamepadEvent = {
+    export function fromGamepadEventType(type: String): EventType {
+        const fields = type.split(":")
+        if (fields.length <= 1) {
+            return EventType.Unknown
+        }
+
+        const name = fields[1]
+        console.log(`name: ${name}`)
+
+        for(const eventName of EventType.events()) {
+            if(eventName == name) {
+                return eventName as EventType
+            }
+        }
+
+        return EventType.Unknown
+    }
+}
+
+export enum EventType {
+    Unknown = "unknown",
+    Connected = "connected",
+    Disconnected = "disconnected",
+    Axis = "axis",
+    Button = "button",
+}
+
+type GamepadEvent = {
     type: String,
     detail: Object,
 }
-type callbackType = (event: Object) => void
+
+type JoystickEvent = {
+    type: EventType,
+    detail: Object,
+}
+
+type callbackType = (event: JoystickEvent) => void
 
 class JoystickManager {
     private static instance = new JoystickManager();
@@ -27,18 +64,16 @@ class JoystickManager {
     }
 
     private connectEvents() {
-        const eventNames = ["connected", "disconnected", "axis", "button"]
-        for(const name of eventNames) {
-            this.gamepadListener.on(`gamepad:${name}`, (event: gamepadEvent) => {
+        for(const name of EventType.events()) {
+            this.gamepadListener.on(`gamepad:${name}`, (event: GamepadEvent) => {
                 for(const callback of this.callbacks) {
-                    const { detail } = event
-                    callback(detail)
+                    const joystickEvent = event as JoystickEvent
+                    joystickEvent.type = EventType.fromGamepadEventType(joystickEvent.type)
+                    callback(joystickEvent)
                 }
             })
         }
     }
 }
 
-const joystickManager = JoystickManager.self()
-
-export default joystickManager
+export const joystickManager = JoystickManager.self()
