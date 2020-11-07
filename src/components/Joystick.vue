@@ -50,7 +50,8 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 
-import { joystickManager, EventType, JoystickEvent} from "../lib/joystick/joystick"
+// eslint-disable-next-line no-unused-vars
+import { joystickManager, EventType, JoystickEvent } from "../lib/joystick/joystick"
 
 export default defineComponent({
     name: "Joystick",
