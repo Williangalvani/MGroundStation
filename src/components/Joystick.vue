@@ -7,12 +7,12 @@
     </div>
   </div>
 
-  <li :v-for="n in joysticks">
+  <li v-for="n in joysticks" v-bind:key="'joystick' + n">
     {{ n }}
   </li>
 
   <div
-    :v-for="elefante in elefantes"
+    v-for="elefante in elefantes" v-bind:key="'elefante' + elefante"
   >
     {{ elefante }}
   <!--div
