@@ -3,6 +3,7 @@ declare module "*.vue" {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+declare module "metro4"
 declare module "gamepad.js"
 declare module "vue-flight-indicators"
 declare module "@vue-leaflet/vue-leaflet"

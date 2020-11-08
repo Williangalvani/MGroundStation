@@ -16,24 +16,26 @@ class Listener {
     }
 
     setCallback (callback:(msg: any) => void): Listener {
-        this.callback = callback
+        //this.callback = callback
         return this
     }
 
     setFrequency(frequency: number): Listener {
         clearInterval(this.interval) // Seems harmless on initialization
+        /*
         this.interval = window.setInterval(() => {
             if (this.parent.latestData !== null) {
                 this.callback(this.parent.latestData)
             }
         }, 1000/frequency)
+        */
         // ask parent to request messages faster?
         return this
     }
 
     discard() {
-        clearInterval(this.interval)
-        this.parent.removeListener(this)
+        //clearInterval(this.interval)
+        //this.parent.removeListener(this)
     }
 }
 

@@ -7,7 +7,17 @@
     </div>
   </div>
 
-  <div class="m-3">
+  <li :v-for="n in joysticks">
+    {{ n }}
+  </li>
+
+  <div
+    :v-for="elefante in elefantes"
+  >
+    {{ elefante }}
+  <!--div
+    class="m-3"
+  >
     <div
       data-role="panel"
       data-title-caption="Joystick"
@@ -28,7 +38,7 @@
               <div class="circle-outline" />
               <div
                 class="joystick-position"
-                style="top: 50%; left: 50%;"
+                :style="{ top: LStickVAxis * 100 + '%', left: LStickHAxis * 100 + '%' }"
               />
             </div>
             <div class="joystick-box">
@@ -37,13 +47,14 @@
               <div class="circle-outline" />
               <div
                 class="joystick-position"
-                style="top: 50%; left: 50%;"
+                :style="{ top: RStickVAxis * 100 + '%', left: RStickHAxis * 100 + '%' }"
               />
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div-->
   </div>
 </template>
 
@@ -51,31 +62,67 @@
 import { defineComponent } from "vue"
 
 // eslint-disable-next-line no-unused-vars
-import { joystickManager, EventType, JoystickEvent } from "../lib/joystick/joystick"
+import { joystickManager, EventType, JoystickEvent, JoystickDetail } from "../lib/joystick/joystick"
 
 export default defineComponent({
     name: "Joystick",
 
-    components: {
-    },
-
     data() {
         return {
+            joysticks: [1, 2, 3],
+            elefantes: [
+                {
+                    oi: 42
+                },
+                {
+                    oi: 43
+                },
+            ],
+            potato: 2,
         }
     },
 
-    created() {
-        joystickManager.onChanged((event) => {
+    mounted() {
+        joystickManager.onJoystickUpdate((event) => {
             this.proccessJoystickEvent(event)
+            this.$forceUpdate()
+        })
+
+        joystickManager.onJoystickStateUpdate((event) => {
+            this.proccessJoystickStateEvent(event)
+            this.$forceUpdate()
         })
     },
 
-    mounted() {
-    },
-
     methods: {
-        proccessJoystickEvent(event: JoystickEvent) {
-            console.log(event.type == EventType.Axis)
+        proccessJoystickEvent(event: Array<Gamepad>) {
+            /*this.joysticks =*/ event
+        },
+
+        proccessJoystickStateEvent(event: JoystickEvent) {
+            /*this.joysticks[event.detail.index] =*/ event.detail.gamepad
+            /*
+            switch(event.type) {
+            case EventType.Axis:
+                console.log(event.detail.stick)
+                if(event.detail.stick == JoystickDetail.Stick.Left) {
+                    if(event.detail.axis == JoystickDetail.Axis.Vertical) {
+                        this.LStickVAxis = event.detail.value / 2 + 0.5
+                    } else {
+                        this.LStickHAxis = event.detail.value / 2 + 0.5
+                    }
+                } else {
+                    if(event.detail.axis == JoystickDetail.Axis.Vertical) {
+                        this.RStickVAxis = event.detail.value / 2 + 0.5
+                    } else {
+                        this.RStickHAxis = event.detail.value / 2 + 0.5
+                    }
+                }
+                break
+            default:
+                return
+            }
+            */
         }
     }
 })

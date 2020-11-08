@@ -13,9 +13,27 @@ type GamepadEvent = {
     detail: Object,
 }
 
+export namespace JoystickDetail {
+    export enum Stick {
+        Left = 0,
+        Right = 1,
+    }
+
+    export enum Axis {
+        Horizontal = 0,
+        Vertical = 1,
+    }
+}
+
 export type JoystickEvent = {
     type: EventType,
-    detail: Object,
+    detail: {
+        index: number
+        gamepad: Gamepad,
+        stick: JoystickDetail.Stick,
+        axis: JoystickDetail.Axis,
+        value: number,
+    },
 }
 
 export namespace EventType {
@@ -41,13 +59,16 @@ export namespace EventType {
     }
 }
 
-type callbackType = (event: JoystickEvent) => void
+type callbackJoystickStateEventType = (event: JoystickEvent) => void
+type callbackJoystickEventType = (event: Array<Gamepad>) => void
 
 class JoystickManager {
-    private static instance = new JoystickManager();
+    private static instance = new JoystickManager()
 
-    private callbacks: Array<callbackType> = [];
-    private gamepadListener = new GamepadListener();
+    private callbacksJoystick: Array<callbackJoystickEventType> = []
+    private callbacksJoystickState: Array<callbackJoystickStateEventType> = []
+    private gamepadListener = new GamepadListener()
+    private joysticks: Array<Gamepad> = []
 
     private constructor() {
         this.gamepadListener.start()
@@ -58,17 +79,68 @@ class JoystickManager {
         return JoystickManager.instance
     }
 
-    onChanged(callback: callbackType) {
-        this.callbacks.push(callback)
+    onJoystickUpdate(callback: callbackJoystickEventType) {
+        this.callbacksJoystick.push(callback)
+    }
+
+    private processJoystickUpdate(event: JoystickEvent) {
+        const index = event.detail.index
+
+        if (index < 0) {
+            console.log(`index: ${index}, length:${this.joysticks.length}`)
+            console.log(`event: ${JSON.stringify(event)}, joysticks: ${JSON.stringify(this.joysticks)}`)
+            throw new Error("Invalid joystick index.")
+        }
+
+        if (index > this.joysticks.length) {
+            console.log(`index: ${index}, length:${this.joysticks.length}`)
+            console.log(`event: ${JSON.stringify(event)}, joysticks: ${JSON.stringify(this.joysticks)}`)
+            throw new Error("Connected joystick index is beyond the number of joysticks connected.")
+        }
+
+        // Let us know if we need to push a new joystick or remove one that already exists
+        let isLatest = true
+
+        if (index < this.joysticks.length) {
+            isLatest = false
+            console.log(`index: ${index}, length:${this.joysticks.length}`)
+            console.log(`event: ${JSON.stringify(event)}, joysticks: ${JSON.stringify(this.joysticks)}`)
+            console.warn("Connected index is below the number of joysticks connected")
+        }
+
+        if (event.type == EventType.Connected) {
+            const gamepad = event.detail.gamepad
+
+            if (isLatest) {
+                this.joysticks.push(gamepad)
+            } else {
+                this.joysticks[index] = gamepad
+            }
+        } else {
+            this.joysticks.splice(index, 1)
+        }
+
+        for(const callback of this.callbacksJoystick) {
+            callback(this.joysticks)
+        }
+    }
+
+    onJoystickStateUpdate(callback: callbackJoystickStateEventType) {
+        this.callbacksJoystickState.push(callback)
     }
 
     private connectEvents() {
         for(const name of EventType.events()) {
             this.gamepadListener.on(`gamepad:${name}`, (event: GamepadEvent) => {
-                for(const callback of this.callbacks) {
-                    const joystickEvent = event as JoystickEvent
-                    joystickEvent.type = EventType.fromGamepadEventType(joystickEvent.type)
+                const joystickEvent = event as JoystickEvent
+                joystickEvent.type = EventType.fromGamepadEventType(joystickEvent.type)
+
+                for(const callback of this.callbacksJoystickState) {
                     callback(joystickEvent)
+                }
+
+                if (name as EventType == EventType.Connected || name as EventType == EventType.Disconnected) {
+                    this.processJoystickUpdate(joystickEvent)
                 }
             })
         }
